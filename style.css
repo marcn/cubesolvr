@@ -1,0 +1,222 @@
+
+body {
+	background: #dcdcdc url(img/bg-repeat.png) repeat-x;
+	overflow-x: hidden;
+}
+
+#main {
+	background: url(img/bg.jpg) no-repeat;
+	width: 1024px;
+	height: 768px;
+	margin: 0 auto;
+}
+
+#camera {
+	position: absolute;
+	margin-top: 128px;
+	margin-left: 337px;
+	width: 352px;
+	height: 515px;
+	background-color: #99a2ab;
+	border-radius: 10px;
+}
+
+#solving {
+	display: none;
+	position: absolute;
+	margin-top: 107px;
+	margin-left: 343px;
+	width: 352px;
+	height: 515px;
+	background: url(img/profcube.gif) no-repeat;
+}
+
+#suggestion {
+	display: none;
+	position: absolute;
+	margin-top: 140px;
+	margin-left: 382px;
+	width: 263px;
+	height: 263px;
+	background: url(img/cube-suggestion.png) no-repeat;
+}
+
+#suggestion .center {
+	margin: 94px 0 0 95px;
+	width: 74px;
+	height: 75px;
+}
+
+#suggestion_move {
+	display: none;
+	position: absolute;
+	margin-top: 117px;
+	margin-left: 668px;
+	width: 88px;
+	height: 95px;
+}
+
+#suggestion_move.right {
+	background: url(img/arrow-90-right.png) no-repeat;
+}
+
+#suggestion_move.left {
+	background: url(img/arrow-90-left.png) no-repeat;
+}
+
+#suggestion_move.one_eighty {
+	background: url(img/arrow-180.png) no-repeat;
+}
+
+#done {
+	display: none;
+	position: absolute;
+	margin-top: 106px;
+	margin-left: 145px;
+	width: 750px;
+	height: 530px;
+	background: url(img/bam.gif) no-repeat;
+}
+
+#done .startover {
+	margin: 485px 0 0 330px;
+	width: 130px;
+	height: 47px;
+	background: url(img/startover.png) no-repeat;
+	cursor: pointer;
+}
+
+#omt {
+	display: none;
+	position: absolute;
+	margin-top: 180px;
+	margin-left: 250px;
+	width: 540px;
+	height: 60px;
+	background: url(img/omt.png) no-repeat;
+}
+
+#input2 {
+	display: none;
+}
+
+#input2 input {
+	width: 324px;
+	height: 40px;
+	margin: 70px 0 148px 12px;
+	padding: 10px 15px;
+	font-size: 100%;
+	border-radius: 10px;
+	border: 1px solid #ccc;
+	outline: 0;
+}
+
+#webcam_container {
+	margin: 15px 15px 0px 15px;
+}
+
+#grid {
+	position: absolute;
+	display: none;
+}
+
+#snapshot_container {
+	background-color: #e1eaf1;
+	width: 320px;
+	height: 240px;
+	margin: 0px 15px 15px 15px;
+}
+
+#camera_button {
+	position: absolute;
+	margin-top: 661px;
+	margin-left: 454px;
+	background: url(img/camera-button.png) no-repeat;
+	width: 114px;
+	height: 47px;
+	cursor: pointer;
+}
+
+#small_cubes {
+	position: relative;
+}
+
+.small_cube {
+	position: absolute;
+	width: 40px;
+	height: 40px;
+	background-color: #99a2ab;
+	border: 0;
+	border-radius: 0;
+	margin: 7px;
+}
+
+.small_cube.selected {
+	border: 7px solid #99a2ab;
+	border-radius: 8px;
+	margin: 0;
+}
+
+.subsnapshot {
+	position: absolute;
+	margin-left: 352px;
+	margin-top: 383px;
+}
+
+#f0 {
+	left: 262px;
+	top: 157px;
+}
+
+#f1 {
+	left: 262px;
+	top: 217px;
+}
+
+#f2 {
+	left: 262px;
+	top: 278px;
+}
+
+#f3 {
+	left: 706px;
+	top: 157px;
+}
+
+#f4 {
+	left: 706px;
+	top: 217px;
+}
+
+#f5 {
+	left: 706px;
+	top: 278px;
+}
+
+.B {
+	background-color: #f0282b;	/* red */
+}
+
+.D {
+	background-color: #e9db00;	/* yellow */
+}
+
+.U {
+	background-color: #ffffff;	/* white */
+}
+
+.F {
+	background-color: #fe9722;	/* orange */
+}
+
+.L {
+	background-color: #2161b2;	/* blue */
+}
+
+.R {
+	background-color: #08a140;	/* green */
+}
+
+.color_grey {
+	background-color:#333333;
+}

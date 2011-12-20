@@ -1,0 +1,26 @@
+<html>
+<head>
+<script src="../swfobject/swfobject.js"></script>
+<script>
+	function capture() {
+		console.time("capture");
+		document.getElementById("camera").capture();
+	}
+	// Callback from webcam.swf with Base64-encoded JPG data
+	function onCapture(data) {
+		console.log("onCapture: ", data.length);
+		document.getElementById("image").src = "data:image/jpg;base64," + data;
+		console.timeEnd("capture");
+	}
+	function load() {
+		swfobject.embedSWF("webcam.swf", "camera", "320", "240", "10", "../swfobject/expressInstall.swf");
+	}
+</script>
+</head>
+<body onload="load()" bgcolor="#dddddd">
+	<div id="camera"></div>
+	<img id="image" width="320" height="240">
+	<br>
+	<button onclick="capture()">Capture</button>
+</body>
+</html>

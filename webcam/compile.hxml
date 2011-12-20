@@ -1,0 +1,4 @@
+-swf webcam.swf
+-swf-lib blooddy_crypto.swf
+-swf-version 10
+-main Webcam

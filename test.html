@@ -1,0 +1,93 @@
+<html>
+	<head>
+		<script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
+		<script type="text/javascript" src="js/underscore-min.js"></script>
+		<script type="text/javascript" src="swfobject/swfobject.js"></script>
+		<script type="text/javascript" src="js/Blob.js"></script>
+		<script type="text/javascript" src="js/color_match.js"></script>
+		<script type="text/javascript" src="js/filters.js"></script>
+		<script type="text/javascript" src="js/StackBlur.js"></script>
+		<script type="text/javascript" src="js/math.js"></script>
+		<script type="text/javascript" src="js/blob_detect.js"></script>
+		<script type="text/javascript" src="js/test.js"></script>
+		<link rel="stylesheet" href="style.css">
+		<style>
+			.cubie {
+				width:48px;height:48px;float:left;border:1px solid white;
+			}
+		</style>
+	</head>
+	<body style="background: #000000">
+		<div style="float:right; padding-right: 50px; color:#ffffff">
+			<span>Sampled Average Color</span>
+			<div id="sampleCube" style="width:150px; height:150px;">
+				<div class="cubie color_grey"></div>
+				<div class="cubie color_grey"></div>
+				<div class="cubie color_grey"></div>
+				<div class="cubie color_grey"></div>
+				<div class="cubie color_grey"></div>
+				<div class="cubie color_grey"></div>
+				<div class="cubie color_grey"></div>
+				<div class="cubie color_grey"></div>
+				<div class="cubie color_grey"></div>
+			</div>
+			<span>Estimated Face Color</span>
+			<div id="calcCube" style="width:150px; height:150px;">
+				<div class="cubie color_grey"></div>
+				<div class="cubie color_grey"></div>
+				<div class="cubie color_grey"></div>
+				<div class="cubie color_grey"></div>
+				<div class="cubie color_grey"></div>
+				<div class="cubie color_grey"></div>
+				<div class="cubie color_grey"></div>
+				<div class="cubie color_grey"></div>
+				<div class="cubie color_grey"></div>
+			</div>
+		</div>
+		<div style="float:right; width:130px; padding-right: 20px; color:#ffffff;">
+			<span style="color:#ffffff">Saturation vs. Hue</span>
+			<canvas id="satvshue" width="110" height="370"></canvas>
+			<br>
+			<input type="checkbox" id="cleargraph" name="cleargraph" checked> Clear before sample
+		</div>
+		<div id="webcam" style="margin: 0"></div>
+		<div style="float:left;">
+			<canvas id="snapshot" height="240" width="320"></canvas>
+		</div>
+		<div id="canvas_container" style="width: 320px; height: 240px;">
+			<canvas id="edgeDetect" height="240" width="320" style="position: absolute;"></canvas>
+			<canvas id="overlay" height="240" width="320" style="position: absolute;"></canvas>
+		</div>
+		<br>
+		<button onclick="capture()">Capture</button>
+		<button onclick="continuous(20)">Continuous</button>
+		<button onclick="contStop()">Stop</button>
+		<br>
+		<span style="color:#ffffff;">(You can use SPACE bar to capture)</span><br>
+		<br>
+		<button onclick="copy()">Copy Test Image</button>
+		<button onclick="stackblur('edgeDetect')">(1) Blur</button>
+		<button onclick="sobel('edgeDetect')">(2) Sobel</button>
+		<button onclick="blobDetect('edgeDetect')">(3) Blob Detect</button>
+		<br>
+		<div style="color:#ffffff; padding-top: 10px;">
+			<span style="color: #0000ff">blue: </span> not square blob<br>
+			<span style="color: #00ff00">green: </span> square blob, not grid detected<br>
+			<span style="color: #ff0000">red: </span> square blob, grid detected<br>
+		</div>
+
+
+		<div style="visibility: hidden;">
+			<img id="testImage" src="img/test.jpg">
+			<img id="webcamImage">
+		</div>
+		<script type="text/javascript">
+			var _gaq = _gaq || [];
+			_gaq.push(['_setAccount', 'UA-106043-4']);
+			_gaq.push(['_trackPageview']);
+  			(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;
+			g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+			s.parentNode.insertBefore(g,s)}(document,'script'));
+		</script>
+	</body>
+</html>
