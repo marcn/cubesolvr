@@ -48,10 +48,6 @@ function onCaptureComplete() {
 	sobel('edgeDetect');
 	if (logging) console.timeEnd("sobel");
 
-	if (logging) console.time("threshold");
-	//threshold('edgeDetect', 55);
-	if (logging) console.timeEnd("threshold");
-
 	if (logging) console.time("blobDetect");
 	var blobs = blobDetect('edgeDetect');
 	if (logging) console.timeEnd("blobDetect");
