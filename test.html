@@ -5,7 +5,7 @@
 		<script type="text/javascript" src="swfobject/swfobject.js"></script>
 		<script type="text/javascript" src="js/Blob.js"></script>
 		<script type="text/javascript" src="js/color_match.js"></script>
-		<script type="text/javascript" src="js/filters.js"></script>
+		<script type="text/javascript" src="js/fast_sobel.js"></script>
 		<script type="text/javascript" src="js/StackBlur.js"></script>
 		<script type="text/javascript" src="js/math.js"></script>
 		<script type="text/javascript" src="js/blob_detect.js"></script>
@@ -51,6 +51,7 @@
 			<input type="checkbox" id="cleargraph" name="cleargraph" checked> Clear before sample
 		</div>
 		<div id="webcam" style="margin: 0"></div>
+		<br>
 		<div style="float:left;">
 			<canvas id="snapshot" height="240" width="320"></canvas>
 		</div>
@@ -62,6 +63,7 @@
 		<button onclick="capture()">Capture</button>
 		<button onclick="continuous(20)">Continuous</button>
 		<button onclick="contStop()">Stop</button>
+		<span id="fps" style="color:yellow;"></span>
 		<br>
 		<span style="color:#ffffff;">(You can use SPACE bar to capture)</span><br>
 		<br>

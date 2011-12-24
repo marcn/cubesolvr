@@ -3,13 +3,15 @@ var pos = 0;
 var ctx = null;
 var image = null;
 var overlayCtx = null;
+var lastContinuousTimestamp = null;
+var logging = true;
 
 function stackblur(id) {
 	stackBlurCanvasRGB(id, 0, 0, 320, 240, 2);
 }
 
 function sobel(id) {
-	Filters.sobel(document.getElementById(id));
+	fastSobel(document.getElementById(id), 320, 240);
 }
 
 function clearOverlay() {
@@ -28,44 +30,59 @@ function resetCanvas() {
 }
 
 function capture() {
-	console.time("capture");
+	if (logging) console.time("capture");
 	$("#webcam").get(0).capture();
 }
 
 function onCaptureComplete() {
-	console.timeEnd("capture");
+	if (logging) console.timeEnd("capture");
 
 	var img = document.getElementById("snapshot").getContext("2d").getImageData(0, 0, 320, 240);
 	document.getElementById("edgeDetect").getContext("2d").putImageData(img, 0, 0);
 
-	console.time("stackblur");
+	if (logging) console.time("stackblur");
 	stackblur('edgeDetect');
-	console.timeEnd("stackblur");
+	if (logging) console.timeEnd("stackblur");
 
-	console.time("sobel");
+	if (logging) console.time("sobel");
 	sobel('edgeDetect');
-	console.timeEnd("sobel");
+	if (logging) console.timeEnd("sobel");
 
-	console.time("blobDetect");
+	if (logging) console.time("threshold");
+	//threshold('edgeDetect', 55);
+	if (logging) console.timeEnd("threshold");
+
+	if (logging) console.time("blobDetect");
 	var blobs = blobDetect('edgeDetect');
-	console.timeEnd("blobDetect");
+	if (logging) console.timeEnd("blobDetect");
 
 	if (blobs.length == 9) {
-		colorScanBlobs(blobs, !cont, "#snapshot", "#sampleCube", "#calcCube", "#satvshue");
+		colorScanBlobs(blobs, logging, "#snapshot", "#sampleCube", "#calcCube", "#satvshue");
 	}
 	if (cont) {
-		setTimeout(capture, 1);
+		var now = new Date().getTime();
+		if (lastContinuousTimestamp != null) {
+			var elapsed = now - lastContinuousTimestamp;
+			var fps10 = String(Math.round(10000 / elapsed));
+			$("#fps").text(fps10.substr(0, fps10.length-1) + "." + fps10.substr(-1, 1) + " fps");
+		}
+		lastContinuousTimestamp = now;
+		setTimeout(capture, 10);
+	} else {
+		$("#fps").text("");
 	}
 }
 
 cont = false;
 function continuous() {
 	cont = true;
+	logging = false;
 	capture();
 }
 
 function contStop() {
 	cont = false;
+	logging = true;
 }
 
 // Copy an image into the canvas
@@ -97,7 +114,7 @@ function onCapture(data) {
 	setTimeout(function() {
 		resetCanvas();
 		document.getElementById("snapshot").getContext("2d").drawImage(img, 0, 0);
-		console.timeEnd("capture");
+		if (logging) console.timeEnd("capture");
 		onCaptureComplete();
 	}, 1);
 }

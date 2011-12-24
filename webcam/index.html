@@ -2,18 +2,49 @@
 <head>
 <script src="../swfobject/swfobject.js"></script>
 <script>
+	var cont = false, lastContinuousTimestamp = null, ticks = 0;
 	function capture() {
-		console.time("capture");
+		if (!cont) {
+			console.time("capture");
+		}
 		document.getElementById("camera").capture();
 	}
 	// Callback from webcam.swf with Base64-encoded JPG data
 	function onCapture(data) {
-		console.log("onCapture: ", data.length);
+		if (!cont) {
+			console.log("onCapture: ", data.length);
+		}
 		document.getElementById("image").src = "data:image/jpg;base64," + data;
-		console.timeEnd("capture");
+		if (!cont) {
+			console.timeEnd("capture");
+		}
+		if (cont) {
+			var now = new Date().getTime();
+			ticks++;
+			var elapsed = now - lastContinuousTimestamp;
+			if (elapsed > 250) {
+				console.log("elapsed", elapsed);
+				console.log("ticks", ticks);
+				var fps10 = String(Math.round(ticks * 10000 / elapsed));
+				document.getElementById("fps").innerHTML = fps10.substr(0, fps10.length-1) + "." + fps10.substr(-1, 1) + " fps";
+				ticks = 0;
+				lastContinuousTimestamp = now;
+			}
+			setTimeout(capture, 1);
+		} else {
+			document.getElementById("fps").innerHTML = "";
+		}
 	}
 	function load() {
 		swfobject.embedSWF("webcam.swf", "camera", "320", "240", "10", "../swfobject/expressInstall.swf");
+	}
+	function continuous() {
+		lastContinuousTimestamp = new Date().getTime();
+		cont = true;
+		capture();
+	}
+	function stop() {
+		cont = false;
 	}
 </script>
 </head>
@@ -22,5 +53,8 @@
 	<img id="image" width="320" height="240">
 	<br>
 	<button onclick="capture()">Capture</button>
+	<button onclick="continuous()">Continuous</button>
+	<button onclick="stop()">Stop</button>
+	<span id="fps"></span>
 </body>
 </html>

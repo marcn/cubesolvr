@@ -23,7 +23,7 @@ function blobDetect(id) {
 			}
 		}
 	}
-	console.log("Found " + blobs.length + " total blobs");
+	if (logging) console.log("Found " + blobs.length + " total blobs");
 	var square = [];
 	for (var i=0; i < blobs.length; i++) {
 		if (blobs[i].isSquare()) {
@@ -32,7 +32,7 @@ function blobDetect(id) {
 			blobs[i].draw("#0000ff");	// not square (blue)
 		}
 	}
-	console.log("Found " + square.length + " square blobs");
+	if (logging) console.log("Found " + square.length + " square blobs");
 
 	// Sort by size (smallest to biggest)
 	square.sort(function(a, b) {

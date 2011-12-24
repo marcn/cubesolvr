@@ -11,6 +11,7 @@ var solutionSteps = [];
 var step = 0;
 var spaceDown = false;
 var audio;
+var logging = true;
 if (window.Audio) {
 	audio = new Audio();
 	if (audio.canPlayType('audio/ogg; codecs="vorbis"')) {
@@ -140,7 +141,7 @@ function onCaptureComplete() {
 		var img = snapshotCtx.getImageData(0, 0, 320, 240);
 		document.getElementById("edgeDetect").getContext("2d").putImageData(img, 0, 0);
 		stackBlurCanvasRGB("edgeDetect", 0, 0, 320, 240, 2);
-		Filters.sobel(document.getElementById("edgeDetect"));
+		fastSobel(document.getElementById("edgeDetect"), 320, 240);
 		var blobs = blobDetect('edgeDetect');
 		if (blobs.length == 9) {
 			var dimensions = blobGroupDimensions(blobs);
