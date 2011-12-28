@@ -53,7 +53,12 @@ function onCaptureComplete() {
 	if (logging) console.timeEnd("blobDetect");
 
 	if (blobs.length == 9) {
-		colorScanBlobs(blobs, logging, "#snapshot", "#sampleCube", "#calcCube", "#satvshue");
+		var colors = getBlobColors(blobs, "#snapshot", "#sampleCube", "#satvshue");
+		var cubies = $("#sampleCube .cubie");
+		for (var i=0; i < 9; i++) {
+			var dist = distanceBetween(colors[i], colors[4]);
+			cubies.eq(i).text(Math.round(dist));
+		}
 	}
 	if (cont) {
 		var now = new Date().getTime();
@@ -94,7 +99,7 @@ $(window).load(function() {
 	resetCanvas();
 	var graphContext = document.getElementById("satvshue").getContext("2d");
 	graphContext.fillStyle = "#cccccc";
-	graphContext.fillRect(0, 0, 110, 370);
+	graphContext.fillRect(0, 0, 220, 370);
 	swfobject.embedSWF("webcam/webcam.swf", "webcam", "320", "240", "10", "swfobject/expressInstall.swf", null,
 			{ allowScriptAccess: "always", wmode: "transparent" });
 });

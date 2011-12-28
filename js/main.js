@@ -289,7 +289,8 @@ function showSolvingUI() {
 }
 
 function onSolutionFound(str) {
-	solutionSteps = str.trim().split(" ");
+	str = str.trim();
+	solutionSteps = str.length > 0 ? str.split(" ") : [];
 	step = 0;
 	var now = new Date().getTime();
 	console.log("now - solveStartTime = ", now - solveStartTime);
@@ -319,10 +320,6 @@ function showCurrentSolutionStep() {
 			audio.currentTime = 0;
 			audio.play();
 		}
-		setTimeout(function() {
-			// hack because we don't get an onload event from the audio tag
-			$("audio").get(0).play();
-		}, 500);
 		return;
 	}
 	var s = solutionSteps[step];

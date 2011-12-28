@@ -30,6 +30,10 @@ function print_message(str) {
 }
 
 function solve() {
+	if (cube == solvedCube) {
+		onSolutionFound("");
+		return;
+	}
 	function solFcn(set_sol) {
 		solution = set_sol;
 		print_solution(set_sol);

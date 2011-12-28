@@ -1,6 +1,3 @@
-var LEFT_EDGE_X = 55;
-var TOP_EDGE_Y = 15;
-var CUBIE_SIZE = 70;
 
 var FACE_TO_HEX = {
 	"F": "#fe9722",	// orange
@@ -12,17 +9,79 @@ var FACE_TO_HEX = {
 	" ": "#acb5bc"	// empty
 };
 
+/**
+ * Calculate the distance between two RGB values.  If the RGB for the test color is deemed to be
+ * washed out, additional distance is added to the result because it will not provide reliable results.
+ * @param test array of [r, g, b]
+ * @param base array of [r, g, b]
+ */
+function distanceBetween(test, base) {
+	var dist = Math.sqrt(
+		(test[0]-base[0]) * (test[0]-base[0]) +
+		(test[1]-base[1]) * (test[1]-base[1]) +
+		(test[2]-base[2]) * (test[2]-base[2]));
+	if (test[0] > 245 && test[1] > 245 && test[2] > 245) {
+		dist += 300;
+	}
+	return dist
+}
 
-function colorScan(size, log, snapShotSelector, sampleSelector, matchSelector, graphSelector) {
-	var blobs = [];
-	for (var y = 0; y < 3; y++) {
-		for (var x = 0; x < 3; x++) {
-			var xpos = CUBIE_SIZE * x + LEFT_EDGE_X + (CUBIE_SIZE / 2) - (size / 2);
-			var ypos = CUBIE_SIZE * y + TOP_EDGE_Y + (CUBIE_SIZE / 2) - (size / 2);
-			blobs.push(new Blob(xpos, ypos, CUBIE_SIZE, CUBIE_SIZE));
+/**
+ * Return array of RGB values for each blob as sampled from it's center region
+ */
+function getBlobColors(blobs, snapShotSelector, sampleSelector, graphSelector) {
+	var graphContext = null;
+	if (graphSelector) {
+		graphContext = $(graphSelector).get(0).getContext("2d");
+	}
+
+	var results = [];
+	var svh = [];
+	var maxSat = 0;
+	var context = $(snapShotSelector).get(0).getContext("2d");
+	var i = 0;
+	blobs.sort(Blob.sortFunction);
+	_.each(blobs, function(blob) {
+		var size = blob.width / 2;	// sample size is half of blob size
+		var xpos = blob.x - (size / 2);
+		var ypos = blob.y - (size / 2);
+		var rgb = computeRGB(xpos, ypos, size, context);
+		results.push(rgb);
+		var hsv = RGB2HSV(rgb);
+		var cssColor = rgbToCss(rgb);
+		// Update sampled color in sample selector div
+		if (sampleSelector) {
+			$("div", sampleSelector).eq(i).removeClass("color_grey").css("background-color", cssColor);
+		}
+		// Mark solid squares in sample area of snapshot canvas
+		context.fillStyle = cssColor;
+		context.fillRect(xpos, ypos, size, size);
+		context.fillStyle = "black";
+		context.strokeRect(xpos, ypos, size, size);
+
+		svh.push([hsv[1], hsv[0], cssColor]);
+		maxSat = Math.max(maxSat, hsv[1]);
+		i++;
+	});
+
+	// saturation vs. hue graph
+	if (graphContext) {
+		if ($("#cleargraph").is(":checked")) {
+			graphContext.fillStyle = "#cccccc";
+			graphContext.fillRect(0, 0, 220, 370);
+		}
+		while (svh.length > 0) {
+			var sv = svh.pop();
+			graphContext.beginPath();
+			graphContext.fillStyle = sv[2];
+			graphContext.arc(((sv[0] / maxSat * 200)) + 5, 360 - sv[1] + 5, 5, 0, Math.PI + (Math.PI * 3) / 2, false);
+			graphContext.fill();
+			graphContext.fillStyle = "black";
+			graphContext.stroke();
 		}
 	}
-	return colorScanBlobs(blobs, log, snapShotSelector, sampleSelector, matchSelector, graphSelector);
+
+	return results;
 }
 
 function colorScanBlobs(blobs, log, snapShotSelector, sampleSelector, matchSelector, graphSelector) {
@@ -41,11 +100,12 @@ function colorScanBlobs(blobs, log, snapShotSelector, sampleSelector, matchSelec
 		var size = blob.width / 2;	// sample size is half of blob size
 		var xpos = blob.x - (size / 2);
 		var ypos = blob.y - (size / 2);
-		var hsv = computeHsv(xpos, ypos, size, context);
+		var rgb = computeRGB(xpos, ypos, size, context);
+		var hsv = RGB2HSV(rgb);
 		var hue = hsv[0];
 		var sat = hsv[1];
 		var val = hsv[2];
-		var cssColor = hsvToCss(hsv);
+		var cssColor = rgbToCss(rgb);
 		if (log) {
 			console.log(hsv, cssColor);
 		}
@@ -106,13 +166,13 @@ function colorScanBlobs(blobs, log, snapShotSelector, sampleSelector, matchSelec
 }
 
 /**
- * Compute the average HSV value for a square centered at the given coordinates
+ * Compute the average RGB value for a square centered at the given coordinates
  * @param x
  * @param y
  * @param size
  * @param context
  */
-function computeHsv(x, y, size, context) {
+function computeRGB(x, y, size, context) {
 	var image = context.getImageData(0, 0, 320, 240);
 	var xmin = Math.floor(x) - Math.floor(size / 2);
 	var xmax = Math.floor(x) + Math.floor(size / 2);
@@ -127,19 +187,18 @@ function computeHsv(x, y, size, context) {
 			bsum += image.data[((yy * (image.width * 4)) + (xx * 4)) + 2];
 		}
 	}
-	return RGB2HSV(rsum / total, gsum / total, bsum / total);
+	return [rsum / total, gsum / total, bsum / total];
 }
 
 
-function hsvToCss(hsv) {
-	var rgb = HSV2RGB(hsv[0], hsv[1], hsv[2]);
+function rgbToCss(rgb) {
 	return "rgb(" + Math.round(rgb[0]) + "," + Math.round(rgb[1]) + "," + Math.round(rgb[2]) + ")";
 }
 
-function RGB2HSV(r, g, b) {
-	r = r / 255;
-	g = g / 255;
-	b = b / 255;
+function RGB2HSV(rgb) {
+	r = rgb[0] / 255;
+	g = rgb[1] / 255;
+	b = rgb[2] / 255;
 	var minVal = Math.min(r, g, b);
 	var maxVal = Math.max(r, g, b);
 	var delta = maxVal - minVal;
