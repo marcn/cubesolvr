@@ -1,4 +1,7 @@
 
+var FACE_ORDER = "FLBRUD";	// color agnostic face notation (front, left, etc.)
+var COLOR_ORDER = "OBRGWY";	// colors on a standard cube (orange, blue, red, etc.)
+
 var FACE_TO_HEX = {
 	"F": "#fe9722",	// orange
 	"L": "#2161b2",	// blue
@@ -84,86 +87,35 @@ function getBlobColors(blobs, snapShotSelector, sampleSelector, graphSelector) {
 	return results;
 }
 
-function colorScanBlobs(blobs, log, snapShotSelector, sampleSelector, matchSelector, graphSelector) {
-	var graphContext = null;
-	if (graphSelector) {
-		graphContext = $(graphSelector).get(0).getContext("2d");
-	}
-
-	var result = "";
-	var svh = [];
-	var maxSat = 0;
-	var context = $(snapShotSelector).get(0).getContext("2d");
-	var i = 0;
-	blobs.sort(Blob.sortFunction);
-	_.each(blobs, function(blob) {
-		var size = blob.width / 2;	// sample size is half of blob size
-		var xpos = blob.x - (size / 2);
-		var ypos = blob.y - (size / 2);
-		var rgb = computeRGB(xpos, ypos, size, context);
-		var hsv = RGB2HSV(rgb);
-		var hue = hsv[0];
-		var sat = hsv[1];
-		var val = hsv[2];
-		var cssColor = rgbToCss(rgb);
-		if (log) {
-			console.log(hsv, cssColor);
-		}
-		// Update sampled color in sample selector div
-		if (sampleSelector) {
-			$("div", sampleSelector).eq(i).removeClass("color_grey").css("background-color", cssColor);
-		}
-
-		// Mark solid squares in sample area of snapshot canvas
-		context.fillStyle = cssColor;
-		context.fillRect(xpos, ypos, size, size);
-		context.fillStyle = "black";
-		context.strokeRect(xpos, ypos, size, size);
-
-		svh.push([sat, hue, cssColor]);
-		maxSat = Math.max(maxSat, hsv[1]);
-
-		// Guess at matching color
-		var match = "";
-		if (sat < 35 || (sat < 50 && hue > 100 && hue < 288 && val > 50)) {
-			match = "U";		// white
-		} else {
-			if (hue > 355 || (hue >= 0 && hue <= 30)) {
-				match = "F";	// orange
-			} else if (hue > 30 && hue <= 87) {
-				match = "D";	// yellow
-			} else if (hue > 87 && hue <= 200) {
-				match = "R";	// green
-			} else if (hue > 200 && hue <= 288) {
-				match = "L";	// blue
-			} else if (hue > 288 && hue <= 355) {
-				match = "B";	// red
+/**
+ * Using proximity of each cubie's color to the (known) center colors, determine it's actual color
+ */
+function matchColors(scanned) {
+	var results = [];
+	for (var f=0; f < 6; f++) {
+		var face = scanned[f];
+		var faceColors = "";
+		for (var i=0; i < 9; i++) {
+			var closestDistance = 1000;
+			var closestColor = "";
+			if (i != 4) {
+				for (var j=0; j < 6; j++) {
+					var dist = distanceBetween(face[i], scanned[j][4]);
+					if (dist < closestDistance) {
+						closestDistance = dist;
+						closestColor = FACE_ORDER.charAt(j);
+					}
+				}
+			} else {
+				closestColor = FACE_ORDER.charAt(f);
 			}
+			faceColors += closestColor;
 		}
-		if (matchSelector) {
-			$("div", matchSelector).eq(i).removeClass("U F D R L B color_grey").addClass(match);
-		}
-		result += match;
-		i++;
-	});
-	// saturation vs. hue graph
-	if (graphContext) {
-		if ($("#cleargraph").is(":checked")) {
-			graphContext.fillStyle = "#cccccc";
-			graphContext.fillRect(0, 0, 110, 370);
-		}
-		while (svh.length > 0) {
-			var sv = svh.pop();
-			graphContext.beginPath();
-			graphContext.fillStyle = sv[2];
-			graphContext.arc(((sv[0] / maxSat * 100)) + 5, 360 - sv[1] + 5, 5, 0, Math.PI + (Math.PI * 3) / 2, false);
-			graphContext.fill();
-			graphContext.fillStyle = "black";
-			graphContext.stroke();
-		}
+		results.push(faceColors);
 	}
-	return result;
+	return results;
 }
+
 
 /**
  * Compute the average RGB value for a square centered at the given coordinates

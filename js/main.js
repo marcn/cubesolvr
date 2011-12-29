@@ -1,7 +1,6 @@
 
-var SCAN_ORDER = "FLBRUD";
 var F=0, L=1, B=2, R=3, U=4, D=5;
-var cubeFaces = [];
+var scannedColors = [];	// array of faces, each one is a 9 length array of rgb values (each of those being an array size 3)
 var capturing = false;
 var currentFace;
 var curentSnapshotImageData;
@@ -22,7 +21,18 @@ if (window.Audio) {
 	audio.load();
 }
 
-function convertToSolverInput() {
+// Prevent errors in browsers that don't have console
+if (window['console'] == null) {
+	window.console = {
+		log: function() {}
+	};
+}
+
+/**
+ * Convert faces array into a string that can be sent to the solver routines
+ * @param cubeFaces array of strings, each string is a face with 9 chars representing the colors for each cubie
+ */
+function convertToSolverInput(cubeFaces) {
 	var x = "";
 	// UF
 	x += cubeFaces[U].charAt(3);
@@ -147,9 +157,7 @@ function onCaptureComplete() {
 			var dimensions = blobGroupDimensions(blobs);
 			curentSnapshotImageData = snapshotCtx.getImageData(
 				dimensions.x, dimensions.y, dimensions.width, dimensions.height);
-			var scan = colorScanBlobs(blobs, true, "#snapshot");
-			console.log(scan);
-			cubeFaces[currentFace] = scan;
+			scannedColors[currentFace] = getBlobColors(blobs, "#snapshot");
 			moveSnapshotToFace(dimensions);
 		} else {
 			scanFace(currentFace);
@@ -180,7 +188,7 @@ function moveSnapshotToFace(dimensions) {
 }
 
 function onMoveSnapshotToFaceComplete() {
-	drawFace(currentFace, cubeFaces[currentFace]);
+	drawFace(currentFace, scannedColors[currentFace]);
 	$(".subsnapshot").fadeOut(500, function() {
 		$(this).remove();
 	});
@@ -189,28 +197,30 @@ function onMoveSnapshotToFaceComplete() {
 }
 
 function drawFace(faceNum, colors) {
+	// colors can either be a string of 9 chars (faces) or array of 9 RGB values
+	var isString = (typeof colors == 'string');
 	var canvas = $("#f"+faceNum+" canvas").get(0);
 	if (canvas && canvas.getContext) {
 		var context = canvas.getContext("2d");
 		context.fillStyle = "#edebee";
 		context.fillRect(0, 0, canvas.width, canvas.height);
-		context.fillStyle = FACE_TO_HEX[colors.charAt(0)];
+		context.fillStyle = isString ? FACE_TO_HEX[colors.charAt(0)] : rgbToCss(colors[0]);
 		context.fillRect(1, 1, 12, 12);
-		context.fillStyle = FACE_TO_HEX[colors.charAt(1)];
+		context.fillStyle = isString ? FACE_TO_HEX[colors.charAt(1)] : rgbToCss(colors[1]);
 		context.fillRect(14, 1, 12, 12);
-		context.fillStyle = FACE_TO_HEX[colors.charAt(2)];
+		context.fillStyle = isString ? FACE_TO_HEX[colors.charAt(2)] : rgbToCss(colors[2]);
 		context.fillRect(27, 1, 12, 12);
-		context.fillStyle = FACE_TO_HEX[colors.charAt(3)];
+		context.fillStyle = isString ? FACE_TO_HEX[colors.charAt(3)] : rgbToCss(colors[3]);
 		context.fillRect(1, 14, 12, 12);
-		context.fillStyle = FACE_TO_HEX[colors.charAt(4)];
+		context.fillStyle = isString ? FACE_TO_HEX[colors.charAt(4)] : rgbToCss(colors[4]);
 		context.fillRect(14, 14, 12, 12);
-		context.fillStyle = FACE_TO_HEX[colors.charAt(5)];
+		context.fillStyle = isString ? FACE_TO_HEX[colors.charAt(5)] : rgbToCss(colors[5]);
 		context.fillRect(27, 14, 12, 12);
-		context.fillStyle = FACE_TO_HEX[colors.charAt(6)];
+		context.fillStyle = isString ? FACE_TO_HEX[colors.charAt(6)] : rgbToCss(colors[6]);
 		context.fillRect(1, 27, 12, 12);
-		context.fillStyle = FACE_TO_HEX[colors.charAt(7)];
+		context.fillStyle = isString ? FACE_TO_HEX[colors.charAt(7)] : rgbToCss(colors[7]);
 		context.fillRect(14, 27, 12, 12);
-		context.fillStyle = FACE_TO_HEX[colors.charAt(8)];
+		context.fillStyle = isString ? FACE_TO_HEX[colors.charAt(8)] : rgbToCss(colors[8]);
 		context.fillRect(27, 27, 12, 12);
 	}
 }
@@ -221,7 +231,7 @@ function init() {
 }
 
 function reset() {
-	cubeFaces = [];
+	scannedColors = [];
 	//scannedFaces = ["FRUBFBFLU", "RRDRLDBDR", "DLDFBULBR", "LFBRRDBFU", "LFFDUBFLL", "RUBUDUULD"];
 	currentFace = null;
 	solutionSteps = [];
@@ -245,8 +255,8 @@ function reset() {
 	$("#suggestion_move").fadeOut();
 	$("#done").fadeOut();
 
-	for (var i=0; i < SCAN_ORDER.length; i++) {
-		drawFace(i, "    " + SCAN_ORDER.charAt(i) + "    ");
+	for (var i=0; i < FACE_ORDER.length; i++) {
+		drawFace(i, "    " + FACE_ORDER.charAt(i) + "    ");
 	}
 	scanNextUnscannedFace();
 
@@ -258,17 +268,25 @@ function scanNextUnscannedFace() {
 	currentFace = null;
 	$(".small_cube").removeClass("selected");
 	for (var i=0; i < 6; i++) {
-		if (cubeFaces[i] == null || cubeFaces[i].length == 0) {
+		if (scannedColors[i] == null || scannedColors[i].length == 0) {
 			scanFace(i);
 			return;
 		}
 	}
 	// All done scanning
-	cube = convertToSolverInput();
-	//cube = "BD LF UF FR UR UB DR BR BL UL DF DL UFR BRD URB FLD RFD DLB ULF UBL"; 	// TODO: REMOVE - TESTING!
-	console.log(cube);
-	var valid = validateCube(cube);
+	var valid = false;
+	var cubeFaces = matchColors(scannedColors);
+	if (cubeFaces != null) {
+		cube = convertToSolverInput(cubeFaces);
+		//cube = "BD LF UF FR UR UB DR BR BL UL DF DL UFR BRD URB FLD RFD DLB ULF UBL"; 	// TODO: REMOVE - TESTING!
+		console.log(cube);
+		valid = validateCube(cube);
+	}
 	if (valid) {
+		// Replace scanned colors with actual matched colors
+		for (var i=0; i < 6; i++) {
+			drawFace(i, cubeFaces[i]);
+		}
 		showSolvingUI();
 	} else {
 		// copy errorImg
@@ -363,7 +381,7 @@ function input2Done(txt) {
 				return;
 			}
 		}
-		cubeFaces[currentFace] = face;
+		//cubeFaces[currentFace] = face;
 		onMoveSnapshotToFaceComplete();
 		//$("#input2 input").val("")
 	}
