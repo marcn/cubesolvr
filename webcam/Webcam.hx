@@ -29,7 +29,7 @@ class Webcam {
 		// OS X may not select proper webcam by default, needs a bit of help
 		var id:Int = -1;
 		for (i in 0...Camera.names.length) {
-			if (Camera.names[i] == "USB Video Class Video") {
+			if (Camera.names[i] == "USB Video Class Video" || Camera.names[i] == "Built-in iSight") {
 				id = i;
 				break;
 			}
