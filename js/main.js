@@ -1,7 +1,7 @@
 
 var SCAN_ORDER = "FLBRUD";
 var F=0, L=1, B=2, R=3, U=4, D=5;
-var scannedFaces = [];
+var cubeFaces = [];
 var capturing = false;
 var currentFace;
 var curentSnapshotImageData;
@@ -25,92 +25,92 @@ if (window.Audio) {
 function convertToSolverInput() {
 	var x = "";
 	// UF
-	x += scannedFaces[U].charAt(3);
-	x += scannedFaces[F].charAt(1);
+	x += cubeFaces[U].charAt(3);
+	x += cubeFaces[F].charAt(1);
 	x += " ";
 	// UR
-	x += scannedFaces[U].charAt(7);
-	x += scannedFaces[R].charAt(1);
+	x += cubeFaces[U].charAt(7);
+	x += cubeFaces[R].charAt(1);
 	x += " ";
 	// UB
-	x += scannedFaces[U].charAt(5);
-	x += scannedFaces[B].charAt(1);
+	x += cubeFaces[U].charAt(5);
+	x += cubeFaces[B].charAt(1);
 	x += " ";
 	// UL
-	x += scannedFaces[U].charAt(1);
-	x += scannedFaces[L].charAt(1);
+	x += cubeFaces[U].charAt(1);
+	x += cubeFaces[L].charAt(1);
 	x += " ";
 	// DF
-	x += scannedFaces[D].charAt(3);
-	x += scannedFaces[F].charAt(7);
+	x += cubeFaces[D].charAt(3);
+	x += cubeFaces[F].charAt(7);
 	x += " ";
 	// DR
-	x += scannedFaces[D].charAt(1);
-	x += scannedFaces[R].charAt(7);
+	x += cubeFaces[D].charAt(1);
+	x += cubeFaces[R].charAt(7);
 	x += " ";
 	// DB
-	x += scannedFaces[D].charAt(5);
-	x += scannedFaces[B].charAt(7);
+	x += cubeFaces[D].charAt(5);
+	x += cubeFaces[B].charAt(7);
 	x += " ";
 	// DL
-	x += scannedFaces[D].charAt(7);
-	x += scannedFaces[L].charAt(7);
+	x += cubeFaces[D].charAt(7);
+	x += cubeFaces[L].charAt(7);
 	x += " ";
 	// FR
-	x += scannedFaces[F].charAt(5);
-	x += scannedFaces[R].charAt(3);
+	x += cubeFaces[F].charAt(5);
+	x += cubeFaces[R].charAt(3);
 	x += " ";
 	// FL
-	x += scannedFaces[F].charAt(3);
-	x += scannedFaces[L].charAt(5);
+	x += cubeFaces[F].charAt(3);
+	x += cubeFaces[L].charAt(5);
 	x += " ";
 	// BR
-	x += scannedFaces[B].charAt(3);
-	x += scannedFaces[R].charAt(5);
+	x += cubeFaces[B].charAt(3);
+	x += cubeFaces[R].charAt(5);
 	x += " ";
 	// BL
-	x += scannedFaces[B].charAt(5);
-	x += scannedFaces[L].charAt(3);
+	x += cubeFaces[B].charAt(5);
+	x += cubeFaces[L].charAt(3);
 	x += " ";
 	// UFR
-	x += scannedFaces[U].charAt(6);
-	x += scannedFaces[F].charAt(2);
-	x += scannedFaces[R].charAt(0);
+	x += cubeFaces[U].charAt(6);
+	x += cubeFaces[F].charAt(2);
+	x += cubeFaces[R].charAt(0);
 	x += " ";
 	// URB
-	x += scannedFaces[U].charAt(8);
-	x += scannedFaces[R].charAt(2);
-	x += scannedFaces[B].charAt(0);
+	x += cubeFaces[U].charAt(8);
+	x += cubeFaces[R].charAt(2);
+	x += cubeFaces[B].charAt(0);
 	x += " ";
 	// UBL
-	x += scannedFaces[U].charAt(2);
-	x += scannedFaces[B].charAt(2);
-	x += scannedFaces[L].charAt(0);
+	x += cubeFaces[U].charAt(2);
+	x += cubeFaces[B].charAt(2);
+	x += cubeFaces[L].charAt(0);
 	x += " ";
 	// ULF
-	x += scannedFaces[U].charAt(0);
-	x += scannedFaces[L].charAt(2);
-	x += scannedFaces[F].charAt(0);
+	x += cubeFaces[U].charAt(0);
+	x += cubeFaces[L].charAt(2);
+	x += cubeFaces[F].charAt(0);
 	x += " ";
 	// DRF
-	x += scannedFaces[D].charAt(0);
-	x += scannedFaces[R].charAt(6);
-	x += scannedFaces[F].charAt(8);
+	x += cubeFaces[D].charAt(0);
+	x += cubeFaces[R].charAt(6);
+	x += cubeFaces[F].charAt(8);
 	x += " ";
 	// DFL
-	x += scannedFaces[D].charAt(6);
-	x += scannedFaces[F].charAt(6);
-	x += scannedFaces[L].charAt(8);
+	x += cubeFaces[D].charAt(6);
+	x += cubeFaces[F].charAt(6);
+	x += cubeFaces[L].charAt(8);
 	x += " ";
 	// DLB
-	x += scannedFaces[D].charAt(8);
-	x += scannedFaces[L].charAt(6);
-	x += scannedFaces[B].charAt(8);
+	x += cubeFaces[D].charAt(8);
+	x += cubeFaces[L].charAt(6);
+	x += cubeFaces[B].charAt(8);
 	x += " ";
 	// DBR
-	x += scannedFaces[D].charAt(2);
-	x += scannedFaces[B].charAt(6);
-	x += scannedFaces[R].charAt(8);
+	x += cubeFaces[D].charAt(2);
+	x += cubeFaces[B].charAt(6);
+	x += cubeFaces[R].charAt(8);
 	return x;
 }
 
@@ -149,7 +149,7 @@ function onCaptureComplete() {
 				dimensions.x, dimensions.y, dimensions.width, dimensions.height);
 			var scan = colorScanBlobs(blobs, true, "#snapshot");
 			console.log(scan);
-			scannedFaces[currentFace] = scan;
+			cubeFaces[currentFace] = scan;
 			moveSnapshotToFace(dimensions);
 		} else {
 			scanFace(currentFace);
@@ -180,7 +180,7 @@ function moveSnapshotToFace(dimensions) {
 }
 
 function onMoveSnapshotToFaceComplete() {
-	drawFace(currentFace, scannedFaces[currentFace]);
+	drawFace(currentFace, cubeFaces[currentFace]);
 	$(".subsnapshot").fadeOut(500, function() {
 		$(this).remove();
 	});
@@ -221,7 +221,7 @@ function init() {
 }
 
 function reset() {
-	scannedFaces = [];
+	cubeFaces = [];
 	//scannedFaces = ["FRUBFBFLU", "RRDRLDBDR", "DLDFBULBR", "LFBRRDBFU", "LFFDUBFLL", "RUBUDUULD"];
 	currentFace = null;
 	solutionSteps = [];
@@ -258,7 +258,7 @@ function scanNextUnscannedFace() {
 	currentFace = null;
 	$(".small_cube").removeClass("selected");
 	for (var i=0; i < 6; i++) {
-		if (scannedFaces[i] == null || scannedFaces[i].length == 0) {
+		if (cubeFaces[i] == null || cubeFaces[i].length == 0) {
 			scanFace(i);
 			return;
 		}
@@ -363,7 +363,7 @@ function input2Done(txt) {
 				return;
 			}
 		}
-		scannedFaces[currentFace] = face;
+		cubeFaces[currentFace] = face;
 		onMoveSnapshotToFaceComplete();
 		//$("#input2 input").val("")
 	}
