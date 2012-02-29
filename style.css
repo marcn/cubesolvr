@@ -163,6 +163,12 @@ body {
 	margin-top: 383px;
 }
 
+video {
+	display:none;
+	width: 320px;
+	height: 240px;
+}
+
 #f0 {
 	left: 262px;
 	top: 157px;

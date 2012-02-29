@@ -11,6 +11,7 @@ var step = 0;
 var spaceDown = false;
 var audio;
 var logging = true;
+var usingWebRTC = false;
 if (window.Audio) {
 	audio = new Audio();
 	if (audio.canPlayType('audio/ogg; codecs="vorbis"')) {
@@ -126,7 +127,13 @@ function convertToSolverInput(cubeFaces) {
 
 function capture() {
 	if (currentFace != null && !capturing) {
-		$("#webcam").get(0).capture();
+		if (usingWebRTC) {
+			var video = $("video").get(0);
+			document.getElementById("snapshot").getContext("2d").drawImage(video, 0, 0);
+			onCaptureComplete();
+		} else {
+			$("#webcam").get(0).capture();
+		}
 	}
 }
 
@@ -398,12 +405,38 @@ function scanFace(face) {
 	$("#f"+face).addClass("selected");
 }
 
+function embedFlash() {
+	console.log("Using Flash");
+	swfobject.embedSWF("webcam/webcam.swf", "webcam", "320", "240", "10", "swfobject/expressInstall.swf", null,
+			{ allowScriptAccess: "always", wmode: "transparent" });
+}
 
 $(window).load(function() {
 
 	$("body").focus();
-	swfobject.embedSWF("webcam/webcam.swf", "webcam", "320", "240", "10", "swfobject/expressInstall.swf", null,
-			{ allowScriptAccess: "always", wmode: "transparent" });
+
+	// Use WebRTC if available, otherwise fall back on Flash
+	if (navigator['webkitGetUserMedia']) {
+		var video = $("video").show().get(0);
+		navigator.webkitGetUserMedia("video",
+			function(stream) {
+				console.log("Using WebRTC");
+				usingWebRTC = true;
+				video.src = window.webkitURL.createObjectURL(stream);
+				// We get 352x288 video back (at least on the MacBook Pro webcam) so to work with existing code,
+				// (which assumes 320x240), scale the video to fit 320x240
+				setTimeout(function() {
+					var scaleX = (320/240) / (video.videoWidth/video.videoHeight);
+					$(video).css("-webkit-transform", "scaleX("+scaleX+")");
+				}, 1);
+			},
+			function(error) {
+				console.log("Unable to get video stream");
+				embedFlash();
+			});
+	} else {
+		embedFlash();
+	}
 
 	$("#camera_button").click(function() {
 		capture();

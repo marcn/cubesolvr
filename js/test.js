@@ -5,6 +5,7 @@ var image = null;
 var overlayCtx = null;
 var lastContinuousTimestamp = null;
 var logging = true;
+var usingWebRTC = false;
 
 function stackblur(id) {
 	stackBlurCanvasRGB(id, 0, 0, 320, 240, 2);
@@ -31,7 +32,16 @@ function resetCanvas() {
 
 function capture() {
 	if (logging) console.time("capture");
-	$("#webcam").get(0).capture();
+	if (usingWebRTC) {
+		var video = $("video").get(0);
+		resetCanvas();
+		var snapshot = document.getElementById("snapshot");
+		snapshot.getContext("2d").drawImage(video, 0, 0, snapshot.width, snapshot.height);
+		if (logging) console.timeEnd("capture");
+		onCaptureComplete();
+	} else {
+		$("#webcam").get(0).capture();
+	}
 }
 
 function onCaptureComplete() {
@@ -94,14 +104,42 @@ function copy() {
 	document.getElementById("edgeDetect").getContext("2d").drawImage(img, 0, 0);
 }
 
+function embedFlash() {
+	console.log("Using Flash");
+	swfobject.embedSWF("webcam/webcam.swf", "webcam", "320", "240", "10", "swfobject/expressInstall.swf", null,
+			{ allowScriptAccess: "always", wmode: "transparent" });
+}
+
 $(window).load(function() {
 	$("body").focus();
 	resetCanvas();
 	var graphContext = document.getElementById("satvshue").getContext("2d");
 	graphContext.fillStyle = "#cccccc";
 	graphContext.fillRect(0, 0, 220, 370);
-	swfobject.embedSWF("webcam/webcam.swf", "webcam", "320", "240", "10", "swfobject/expressInstall.swf", null,
-			{ allowScriptAccess: "always", wmode: "transparent" });
+
+	// Use WebRTC if available, otherwise fall back on Flash
+	if (navigator['webkitGetUserMedia']) {
+		var video = $("video").show().get(0);
+		navigator.webkitGetUserMedia("video",
+			function(stream) {
+				console.log("Using WebRTC");
+				usingWebRTC = true;
+				video.src = window.webkitURL.createObjectURL(stream);
+				// We get 352x288 video back (at least on the MacBook Pro webcam) so to work with existing code,
+				// (which assumes 320x240), scale the video to fit 320x240
+				setTimeout(function() {
+					var scaleX = (320/240) / (video.videoWidth/video.videoHeight);
+					$(video).css("-webkit-transform", "scaleX("+scaleX+")");
+				}, 1);
+			},
+			function(error) {
+				console.log("Unable to get video stream");
+				embedFlash();
+			});
+	} else {
+		embedFlash();
+	}
+
 });
 
 /**
