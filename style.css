@@ -22,7 +22,7 @@ body {
 }
 
 #solving {
-	display: none;
+	visibility: hidden;
 	position: absolute;
 	margin-top: 107px;
 	margin-left: 343px;

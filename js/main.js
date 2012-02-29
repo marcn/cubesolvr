@@ -257,7 +257,7 @@ function reset() {
 
 	$("#omt").fadeOut();
 	$("#input2").fadeOut();
-	$("#solving").fadeOut();
+	$("#solving").css("visibility", "hidden");
 	$("#suggestion").fadeOut();
 	$("#suggestion_move").fadeOut();
 	$("#done").fadeOut();
@@ -308,7 +308,7 @@ function scanNextUnscannedFace() {
 function showSolvingUI() {
 	$("#camera").fadeOut();
 	$("#camera_button").fadeOut();
-	$("#solving").fadeIn();
+	$("#solving").hide().css("visibility", "visible").fadeIn();
 	solveStartTime = new Date().getTime();
 	solve();
 }
@@ -331,7 +331,7 @@ function showCurrentSolutionStep() {
 		return;
 	}
 	if (step == 0) {
-		$("#solving").fadeOut();
+		$("#solving").css("visibility", "hidden");
 		$(".small_cube").fadeOut();
 		$("#suggestion").fadeIn();
 		$("#suggestion_move").fadeIn();
@@ -362,7 +362,7 @@ function omt() {
 	$("#camera").fadeOut();
 	$("#camera_button").fadeOut();
 	$(".small_cube").fadeOut();
-	$("#solving").fadeOut();
+	$("#solving").css("visibility", "hidden");
 	$("#suggestion").fadeOut();
 	$("#suggestion_move").fadeOut();
 	$("#done").fadeOut();
@@ -372,7 +372,7 @@ function omt() {
 function showInput2() {
 	$("#input2").fadeIn();
 	$("#camera").fadeIn();
-	$("#webcam_container").fadeOut();
+	$("#webcam_container").hide();
 }
 
 function input2Done(txt) {
