@@ -372,18 +372,18 @@ function input2Done(txt) {
 	var words = txt.toLowerCase().trim().split(" ");
 	console.log(words);
 	if (words.length == 9) {
-		var face = "";
+		var face = [];
 		for (var i=-0; i < 9; i++) {
-			var word = wordToFace[words[i]];
-			if (word != null) {
-				face += word;
+			var rgb = COLOR_TO_RGB[words[i]];
+			if (rgb != null) {
+				face.push(rgb);
 			} else {
 				return;
 			}
 		}
-		//cubeFaces[currentFace] = face;
+		scannedColors[currentFace] = face;
 		onMoveSnapshotToFaceComplete();
-		//$("#input2 input").val("")
+		$("#input2 input").val("")
 	}
 }
 

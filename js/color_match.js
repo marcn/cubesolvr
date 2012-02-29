@@ -1,6 +1,5 @@
 
 var FACE_ORDER = "FLBRUD";	// color agnostic face notation (front, left, etc.)
-var COLOR_ORDER = "OBRGWY";	// colors on a standard cube (orange, blue, red, etc.)
 
 var FACE_TO_HEX = {
 	"F": "#fe9722",	// orange
@@ -10,6 +9,16 @@ var FACE_TO_HEX = {
 	"U": "#ffffff",	// white
 	"D": "#e9db00",	// yellow
 	" ": "#acb5bc"	// empty
+};
+
+// Used for translating color name to an RGB array
+var COLOR_TO_RGB = {
+	"orange": [254, 151, 34],
+	"blue":   [33, 97, 178],
+	"red":    [240, 40, 43],
+	"green":  [8, 161, 64],
+	"white":  [255, 255, 255],
+	"yellow": [233, 219, 0]
 };
 
 /**
