@@ -1,0 +1,109 @@
+<html>
+	<head>
+		<!-- Supporting libs -->
+		<script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
+		<script type="text/javascript" src="js/underscore-min.js"></script>
+		<script type="text/javascript" src="swfobject/swfobject.js"></script>
+		<!-- Cube facelet detection -->
+		<script type="text/javascript" src="js/Blob.js"></script>
+		<script type="text/javascript" src="js/fast_sobel.js"></script>
+		<script type="text/javascript" src="js/StackBlur.js"></script>
+		<script type="text/javascript" src="js/math.js"></script>
+		<script type="text/javascript" src="js/blob_detect.js"></script>
+		<!-- Color matching -->
+		<script type="text/javascript" src="js/color_match.js"></script>
+		<!-- Solving -->
+		<script type="text/javascript" src="js/callstack.js"></script>
+		<script type="text/javascript" src="js/solve.js"></script>
+		<script type="text/javascript" src="js/cube.js"></script>
+		<!-- Main -->
+		<script type="text/javascript" src="js/main.js"></script>
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<div id="main">
+			<div id="camera">
+				<div id="webcam_container">
+					<div id="webcam"></div>
+					<video autoplay></video>
+				</div>
+				<div id="input2">
+					<input type="text" speech x-webkit-speech onwebkitspeechchange="input2Done(this.value)">
+				</div>
+				<div id="snapshot_container"><canvas id="snapshot" height="240" width="320"></canvas></div>
+			</div>
+			<div id="solving"></div>
+			<div id="suggestion">
+				<div class="center"></div>
+			</div>
+			<div id="done">
+				<div class="startover"></div>
+			</div>
+			<div id="omt"></div>
+			<div id="suggestion_move"></div>
+			<div id="small_cubes">
+				<!-- Face 0: Orange -->
+				<div id="f0" class="small_cube">
+					<img class="green_check" src="img/check.png" width="25" height="25" style="display: none">
+					<canvas width="40" height="40"></canvas>
+				</div>
+				<!-- Face 1: Blue -->
+				<div id="f1" class="small_cube">
+					<img class="green_check" src="img/check.png" width="25" height="25" style="display: none">
+					<canvas width="40" height="40"></canvas>
+				</div>
+				<!-- Face 2: Red -->
+				<div id="f2" class="small_cube">
+					<img class="green_check" src="img/check.png" width="25" height="25" style="display: none">
+					<canvas width="40" height="40"></canvas>
+				</div>
+				<!-- Face 3: Green -->
+				<div id="f3" class="small_cube">
+					<img class="green_check" src="img/check.png" width="25" height="25" style="display: none">
+					<canvas width="40" height="40"></canvas>
+				</div>
+				<!-- Face 4: White -->
+				<div id="f4" class="small_cube">
+					<img class="green_check" src="img/check.png" width="25" height="25" style="display: none">
+					<canvas width="40" height="40"></canvas>
+				</div>
+				<!-- Face 5: Yellow -->
+				<div id="f5" class="small_cube">
+					<img class="green_check" src="img/check.png" width="25" height="25" style="display: none">
+					<canvas width="40" height="40"></canvas>
+				</div>
+			</div>
+			<div id="camera_button"></div>
+		</div>
+		<div style="position: absolute; top: 0; left: 0; visibility: hidden;">
+			<!-- Scratch elements -->
+			<canvas id="edgeDetect" height="240" width="320"></canvas>
+			<img id="webcamImage">
+			<!-- Source images to copy into canvas -->
+			<img id="step1" src="img/step1.png">
+			<img id="step2" src="img/step2.png">
+			<img id="step3" src="img/step3.png">
+			<img id="step4" src="img/step4.png">
+			<img id="step5" src="img/step5.png">
+			<img id="step6" src="img/step6.png">
+			<img id="errorImg" src="img/error.png">
+			<!-- Hack to preload background images in CSS in hidden elements -->
+			<img src="img/profcube.gif">
+			<img src="img/cube-suggestion.png">
+			<img src="img/arrow-90-right.png">
+			<img src="img/arrow-90-left.png">
+			<img src="img/arrow-180.png">
+			<img src="img/bam.gif">
+			<img src="img/startover.png">
+			<img src="img/omt.png">
+		</div>
+		<script type="text/javascript">
+			var _gaq = _gaq || [];
+			_gaq.push(['_setAccount', 'UA-106043-4']);
+			_gaq.push(['_trackPageview']);
+  			(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;
+			g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+			s.parentNode.insertBefore(g,s)}(document,'script'));
+		</script>
+	</body>
+</html>
