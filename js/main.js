@@ -416,9 +416,10 @@ $(window).load(function() {
 	$("body").focus();
 
 	// Use WebRTC if available, otherwise fall back on Flash
+	/*
 	if (navigator['webkitGetUserMedia']) {
 		var video = $("video").show().get(0);
-		navigator.webkitGetUserMedia("video",
+		navigator.webkitGetUserMedia({video: true},
 			function(stream) {
 				console.log("Using WebRTC");
 				usingWebRTC = true;
@@ -437,6 +438,9 @@ $(window).load(function() {
 	} else {
 		embedFlash();
 	}
+	*/
+	// WebRTC has changed since I wrote the code above, temporarily forcing Flash for all browsers until I can fix it
+	embedFlash();
 
 	$("#camera_button").click(function() {
 		capture();

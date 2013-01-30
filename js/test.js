@@ -118,6 +118,7 @@ $(window).load(function() {
 	graphContext.fillRect(0, 0, 220, 370);
 
 	// Use WebRTC if available, otherwise fall back on Flash
+	/*
 	if (navigator['webkitGetUserMedia']) {
 		var video = $("video").show().get(0);
 		navigator.webkitGetUserMedia("video",
@@ -139,6 +140,8 @@ $(window).load(function() {
 	} else {
 		embedFlash();
 	}
+	*/
+	embedFlash();
 
 });
 

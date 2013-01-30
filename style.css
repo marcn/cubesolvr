@@ -163,6 +163,22 @@ body {
 	margin-top: 383px;
 }
 
+.about {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    color: #313b45;
+    top: 160px;
+    position: relative;
+}
+
+.about h1 {
+    font-size: 26pt;
+}
+
+.about h2 {
+    font-weight: bold;
+}
+
 video {
 	display:none;
 	width: 320px;
