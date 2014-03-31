@@ -4,8 +4,8 @@ CubeSolvr - Solve a Rubik's Cube in your browser using a webcam and computer vis
 This is a project created in two days for a "hack-a-thon" competition.  Since the hack-a-thon it has been extended and tweaked to further improve the accuracy and ease of use.  There is still a lot to do, including major code refactoring, cleanup, commenting, etc.
 
 
-To try the app go to http://www.cubesolvr.com
-To play with the test page go to http://www.cubesolvr.com/test.html
+To try the app go to http://novakowski.net/cubesolvr
+To play with the test page go to http://novakowski.net/cubesolvr/test.html
 
 
 More documentation and info to come.
