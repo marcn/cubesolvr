@@ -7,6 +7,7 @@ This is a project created in two days for a "hack-a-thon" competition.  Since th
 To try the app go to http://novakowski.net/cubesolvr
 To play with the test page go to http://novakowski.net/cubesolvr/test.html
 
+IMPORTANT: the code assumes solid color squares on the cube and will probably not work with official Rubik's Cubes that have a logo on the white center.
 
 More documentation and info to come.
 
