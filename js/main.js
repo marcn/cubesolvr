@@ -11,7 +11,7 @@ var step = 0;
 var spaceDown = false;
 var audio;
 var logging = true;
-var usingWebRTC = false;
+var videoEl;
 if (window.Audio) {
 	audio = new Audio();
 	if (audio.canPlayType('audio/ogg; codecs="vorbis"')) {
@@ -127,29 +127,32 @@ function convertToSolverInput(cubeFaces) {
 
 function capture() {
 	if (currentFace != null && !capturing) {
-		if (usingWebRTC) {
-			var video = $("video").get(0);
-			document.getElementById("snapshot").getContext("2d").drawImage(video, 0, 0);
-			onCaptureComplete();
-		} else {
-			$("#webcam").get(0).capture();
-		}
+		capturing = true;
+		drawVideoToSnapshot();
+		onCaptureComplete();
 	}
 }
 
-/**
- * Callback from webcam.swf
- * @param data base64 encoded JPG image from webcam
- */
-function onCapture(data) {
-	capturing = true;
-	var img = $("#webcamImage").get(0);
-	img.src = "data:image/jpg;base64," + data;
-	// Allow image to be drawn into element before attempting to read pixels from it
-	setTimeout(function() {
-		document.getElementById("snapshot").getContext("2d").drawImage(img, 0, 0);
-		onCaptureComplete();
-	}, 1);
+// Draw the live video frame into the 320x240 snapshot canvas, center-cropping
+// to preserve aspect ratio (webcams typically deliver 16:9; canvas is 4:3).
+function drawVideoToSnapshot() {
+	var ctx = document.getElementById("snapshot").getContext("2d");
+	var vw = videoEl.videoWidth;
+	var vh = videoEl.videoHeight;
+	if (!vw || !vh) {
+		return;
+	}
+	var targetAspect = 320 / 240;
+	var srcAspect = vw / vh;
+	var sx = 0, sy = 0, sw = vw, sh = vh;
+	if (srcAspect > targetAspect) {
+		sw = vh * targetAspect;
+		sx = (vw - sw) / 2;
+	} else if (srcAspect < targetAspect) {
+		sh = vw / targetAspect;
+		sy = (vh - sh) / 2;
+	}
+	ctx.drawImage(videoEl, sx, sy, sw, sh, 0, 0, 320, 240);
 }
 
 function onCaptureComplete() {
@@ -405,42 +408,29 @@ function scanFace(face) {
 	$("#f"+face).addClass("selected");
 }
 
-function embedFlash() {
-	console.log("Using Flash");
-	swfobject.embedSWF("webcam/webcam.swf", "webcam", "320", "240", "10", "swfobject/expressInstall.swf", null,
-			{ allowScriptAccess: "always", wmode: "transparent" });
+function setupCamera() {
+	videoEl = document.getElementById("webcam");
+	if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+		console.log("getUserMedia is not supported in this browser");
+		return;
+	}
+	navigator.mediaDevices.getUserMedia({
+		video: { width: { ideal: 640 }, height: { ideal: 480 } },
+		audio: false
+	}).then(function(stream) {
+		videoEl.srcObject = stream;
+	}).catch(function(err) {
+		console.log("Unable to access webcam:", err);
+		alert("Unable to access webcam: " + err.message +
+			"\n\nNote: webcam access requires the page to be loaded over https:// (or via http://localhost) and you must grant camera permission.");
+	});
 }
 
 $(window).load(function() {
 
 	$("body").focus();
 
-	// Use WebRTC if available, otherwise fall back on Flash
-	/*
-	if (navigator['webkitGetUserMedia']) {
-		var video = $("video").show().get(0);
-		navigator.webkitGetUserMedia({video: true},
-			function(stream) {
-				console.log("Using WebRTC");
-				usingWebRTC = true;
-				video.src = window.webkitURL.createObjectURL(stream);
-				// We get 352x288 video back (at least on the MacBook Pro webcam) so to work with existing code,
-				// (which assumes 320x240), scale the video to fit 320x240
-				setTimeout(function() {
-					var scaleX = (320/240) / (video.videoWidth/video.videoHeight);
-					$(video).css("-webkit-transform", "scaleX("+scaleX+")");
-				}, 1);
-			},
-			function(error) {
-				console.log("Unable to get video stream");
-				embedFlash();
-			});
-	} else {
-		embedFlash();
-	}
-	*/
-	// WebRTC has changed since I wrote the code above, temporarily forcing Flash for all browsers until I can fix it
-	embedFlash();
+	setupCamera();
 
 	$("#camera_button").click(function() {
 		capture();

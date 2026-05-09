@@ -5,7 +5,7 @@ var image = null;
 var overlayCtx = null;
 var lastContinuousTimestamp = null;
 var logging = true;
-var usingWebRTC = false;
+var videoEl = null;
 
 function stackblur(id) {
 	stackBlurCanvasRGB(id, 0, 0, 320, 240, 2);
@@ -32,16 +32,25 @@ function resetCanvas() {
 
 function capture() {
 	if (logging) console.time("capture");
-	if (usingWebRTC) {
-		var video = $("video").get(0);
-		resetCanvas();
-		var snapshot = document.getElementById("snapshot");
-		snapshot.getContext("2d").drawImage(video, 0, 0, snapshot.width, snapshot.height);
-		if (logging) console.timeEnd("capture");
-		onCaptureComplete();
-	} else {
-		$("#webcam").get(0).capture();
+	resetCanvas();
+	var snapshot = document.getElementById("snapshot");
+	if (videoEl && videoEl.videoWidth) {
+		var vw = videoEl.videoWidth;
+		var vh = videoEl.videoHeight;
+		var targetAspect = snapshot.width / snapshot.height;
+		var srcAspect = vw / vh;
+		var sx = 0, sy = 0, sw = vw, sh = vh;
+		if (srcAspect > targetAspect) {
+			sw = vh * targetAspect;
+			sx = (vw - sw) / 2;
+		} else if (srcAspect < targetAspect) {
+			sh = vw / targetAspect;
+			sy = (vh - sh) / 2;
+		}
+		snapshot.getContext("2d").drawImage(videoEl, sx, sy, sw, sh, 0, 0, snapshot.width, snapshot.height);
 	}
+	if (logging) console.timeEnd("capture");
+	onCaptureComplete();
 }
 
 function onCaptureComplete() {
@@ -104,10 +113,20 @@ function copy() {
 	document.getElementById("edgeDetect").getContext("2d").drawImage(img, 0, 0);
 }
 
-function embedFlash() {
-	console.log("Using Flash");
-	swfobject.embedSWF("webcam/webcam.swf", "webcam", "320", "240", "10", "swfobject/expressInstall.swf", null,
-			{ allowScriptAccess: "always", wmode: "transparent" });
+function setupCamera() {
+	videoEl = document.getElementById("webcam");
+	if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+		console.log("getUserMedia is not supported in this browser");
+		return;
+	}
+	navigator.mediaDevices.getUserMedia({
+		video: { width: { ideal: 640 }, height: { ideal: 480 } },
+		audio: false
+	}).then(function(stream) {
+		videoEl.srcObject = stream;
+	}).catch(function(err) {
+		console.log("Unable to access webcam:", err);
+	});
 }
 
 $(window).load(function() {
@@ -117,49 +136,8 @@ $(window).load(function() {
 	graphContext.fillStyle = "#cccccc";
 	graphContext.fillRect(0, 0, 220, 370);
 
-	// Use WebRTC if available, otherwise fall back on Flash
-	/*
-	if (navigator['webkitGetUserMedia']) {
-		var video = $("video").show().get(0);
-		navigator.webkitGetUserMedia("video",
-			function(stream) {
-				console.log("Using WebRTC");
-				usingWebRTC = true;
-				video.src = window.webkitURL.createObjectURL(stream);
-				// We get 352x288 video back (at least on the MacBook Pro webcam) so to work with existing code,
-				// (which assumes 320x240), scale the video to fit 320x240
-				setTimeout(function() {
-					var scaleX = (320/240) / (video.videoWidth/video.videoHeight);
-					$(video).css("-webkit-transform", "scaleX("+scaleX+")");
-				}, 1);
-			},
-			function(error) {
-				console.log("Unable to get video stream");
-				embedFlash();
-			});
-	} else {
-		embedFlash();
-	}
-	*/
-	embedFlash();
-
+	setupCamera();
 });
-
-/**
- * Callback from webcam.swf
- * @param data base64 encoded JPG image from webcam
- */
-function onCapture(data) {
-	var img = document.getElementById("webcamImage");
-	img.src = "data:image/jpg;base64," + data;
-	// Allow image to be drawn into element before attempting to read pixels from it
-	setTimeout(function() {
-		resetCanvas();
-		document.getElementById("snapshot").getContext("2d").drawImage(img, 0, 0);
-		if (logging) console.timeEnd("capture");
-		onCaptureComplete();
-	}, 1);
-}
 
 $(document).keydown(function(evt) {
 	if (evt.keyCode == 32) {

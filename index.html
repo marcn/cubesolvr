@@ -3,7 +3,6 @@
 		<!-- Supporting libs -->
 		<script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
 		<script type="text/javascript" src="js/underscore-min.js"></script>
-		<script type="text/javascript" src="swfobject/swfobject.js"></script>
 		<!-- Cube facelet detection -->
 		<script type="text/javascript" src="js/Blob.js"></script>
 		<script type="text/javascript" src="js/fast_sobel.js"></script>
@@ -24,8 +23,7 @@
 		<div id="main">
 			<div id="camera">
 				<div id="webcam_container">
-					<div id="webcam"></div>
-					<video autoplay></video>
+					<video id="webcam" autoplay playsinline muted width="320" height="240"></video>
 				</div>
 				<div id="input2">
 					<input type="text" speech x-webkit-speech onwebkitspeechchange="input2Done(this.value)">
