@@ -57,7 +57,11 @@ function getBlobColors(blobs, snapShotSelector, sampleSelector, graphSelector) {
 		var size = blob.width / 2;	// sample size is half of blob size
 		var xpos = blob.x - (size / 2);
 		var ypos = blob.y - (size / 2);
-		var rgb = computeRGB(xpos, ypos, size, context);
+		// For an inferred center, the cubie may have a logo at its center, so
+		// sample from four small patches near the cubie corners and average.
+		var rgb = blob.inferred
+			? sampleInferredCenterRGB(blob, context)
+			: computeRGB(xpos, ypos, size, context);
 		results.push(rgb);
 		var hsv = RGB2HSV(rgb);
 		var cssColor = rgbToCss(rgb);
@@ -125,6 +129,28 @@ function matchColors(scanned) {
 	return results;
 }
 
+
+/**
+ * Average the RGB across four small patches positioned near the corners of the
+ * cubie. Used when the center cubie has a logo or marking that would distort
+ * a simple center-of-cell sample.
+ */
+function sampleInferredCenterRGB(blob, context) {
+	var patchSize = Math.max(4, Math.floor(blob.width / 4));
+	var dx = blob.width / 3;
+	var dy = blob.height / 3;
+	var samples = [
+		computeRGB(blob.x - dx, blob.y - dy, patchSize, context),
+		computeRGB(blob.x + dx, blob.y - dy, patchSize, context),
+		computeRGB(blob.x - dx, blob.y + dy, patchSize, context),
+		computeRGB(blob.x + dx, blob.y + dy, patchSize, context)
+	];
+	var r = 0, g = 0, b = 0;
+	_.each(samples, function(s) {
+		r += s[0]; g += s[1]; b += s[2];
+	});
+	return [r / samples.length, g / samples.length, b / samples.length];
+}
 
 /**
  * Compute the average RGB value for a square centered at the given coordinates

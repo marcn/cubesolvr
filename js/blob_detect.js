@@ -115,11 +115,36 @@ function blobDetect(id) {
 	var lowest = NO_CONFIDENCE;
 	var winners = [];
 	_.each(gridGroups, function(grid, score) {
-		if (score < lowest) {
+		if (Number(score) < lowest) {
 			winners = grid;
-			lowest = score;
+			lowest = Number(score);
 		}
 	});
+
+	// Always also try 8-blob "ring" detection. Some cubes have a logo on a
+	// center cubie (e.g., the white face on official Rubik's Cubes), which
+	// prevents the center from being detected as a solid blob — but a small
+	// noise blob inside the logo can still be misidentified as the center,
+	// giving a poor 9-blob fit. So we score both candidates and pick the
+	// better one (with a small bias toward the 9-blob solution to avoid
+	// false positives when there is no logo).
+	var ring = detectRing(sizeGroups);
+	var RING_PENALTY = 2;
+	var useRing = false;
+	if (ring.blobs.length === 9) {
+		if (winners.length !== 9) {
+			useRing = true;
+		} else if (ring.score + RING_PENALTY < lowest) {
+			useRing = true;
+		}
+	}
+	if (useRing) {
+		if (logging) {
+			console.log("Using inferred-center grid (ring score=" + ring.score.toFixed(2) +
+				", 9-blob score=" + (lowest === NO_CONFIDENCE ? "n/a" : lowest.toFixed(2)) + ")");
+		}
+		winners = ring.blobs;
+	}
 
 	// Draw out the color-coded blobs
 	_.each(square, function(blob) {
@@ -131,8 +156,81 @@ function blobDetect(id) {
 			//blob.drawLabel();
 		}
 	});
+	// Inferred center isn't in `square`, draw it separately
+	_.each(winners, function(blob) {
+		if (blob.inferred) {
+			blob.draw("#ffff00");	// inferred center (yellow)
+		}
+	});
 
 	return winners;
+}
+
+// Synthesize the missing center blob as the centroid of the 8 surrounding blobs.
+// In a true 3x3-minus-center ring the centroid coincides with the missing cell.
+function inferCenterBlob(eightBlobs) {
+	var sumX = 0, sumY = 0, sumW = 0, sumH = 0;
+	_.each(eightBlobs, function(b) {
+		sumX += b.x; sumY += b.y;
+		sumW += b.width; sumH += b.height;
+	});
+	var n = eightBlobs.length;
+	var center = new Blob(
+		Math.round(sumX / n),
+		Math.round(sumY / n),
+		Math.round(sumW / n),
+		Math.round(sumH / n)
+	);
+	center.inferred = true;
+	return center;
+}
+
+// Look for 8 blobs that form a ring around a missing center. For each
+// candidate 8-set, synthesize the center at the centroid and score the
+// resulting 9-set with cubeGridConfidence. Returns { blobs, score }.
+function detectRing(sizeGroups) {
+	var ringGroups = {};
+	_.each(sizeGroups, function(group) {
+		if (group.length < 8) {
+			return;
+		}
+		var candidateGroups = [];
+		if (group.length >= 14) {
+			// Limit combinatorial explosion the same way the 9-blob path does
+			_.each(group, function(srcBlob) {
+				var candidateGroup = [srcBlob];
+				_.each(group, function(otherBlob) {
+					if (srcBlob !== otherBlob && srcBlob.couldBeInSameGrid(otherBlob)) {
+						candidateGroup.push(otherBlob);
+					}
+				});
+				if (candidateGroup.length >= 8) {
+					candidateGroups.push(candidateGroup);
+				}
+			});
+		} else {
+			candidateGroups.push(group);
+		}
+		_.each(candidateGroups, function(cg) {
+			_.each(combinations(cg, 8), function(candidate) {
+				var center = inferCenterBlob(candidate);
+				var nine = candidate.concat([center]);
+				var score = cubeGridConfidence(nine);
+				if (score < NO_CONFIDENCE) {
+					ringGroups[score] = nine;
+				}
+			});
+		});
+	});
+	var lowest = NO_CONFIDENCE;
+	var best = [];
+	_.each(ringGroups, function(grid, score) {
+		if (Number(score) < lowest) {
+			best = grid;
+			lowest = Number(score);
+		}
+	});
+	return { blobs: best, score: lowest };
 }
 
 
